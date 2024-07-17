@@ -1,0 +1,11 @@
+restart-time: "08:30" # Time in 24hr format when the server will restart
+
+messages:
+  warning_30: "30 minutes Until Restart"
+  warning_15: "15 minutes Until Restart"
+  warning_10: "10 minutes Until Restart"
+  warning_5: "5 minutes Until Restart"
+  warning_1: "1 minute Until Restart"
+  countdown: "%seconds% seconds Until Restart."
+  restart: "Server Restarting..."
+  forced_restart: "Restart scheduled in %minutes% minutes."
