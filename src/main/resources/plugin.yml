@@ -1,6 +1,6 @@
 name: GijinkakunRestart
 main: com.GijinkakunRestart.GijinkakunRestart
-version: 1.0
+version: 1.0.1
 api-version: 1.21.0
 description: GijinkakunRestart is plugin designed to automate server restarts at a configurable time. It provides advance warnings with customizable countdowns and sound effects to alert players before a scheduled restart. 
 author: Christopher Satterthwaite

@@ -14,7 +14,9 @@ import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class GijinkakunRestart extends JavaPlugin {
 
@@ -33,6 +35,8 @@ public class GijinkakunRestart extends JavaPlugin {
             logToConsole("Invalid time format in config.yml: " + e.getParsedString(), ChatColor.RED);
             getServer().getPluginManager().disablePlugin(this);
         }
+        getCommand("gijinkakunrestart").setExecutor(this);
+        getCommand("gijinkakunrestart").setTabCompleter(this);
     }
 
     @Override
@@ -55,14 +59,24 @@ public class GijinkakunRestart extends JavaPlugin {
             int minutes = Integer.parseInt(args[0]);
             scheduleForcedRestart(minutes);
             String forcedRestartMessage = getConfig().getString("messages.forced_restart", "Forced restart scheduled in %minutes% minutes.");
+            forcedRestartMessage = forcedRestartMessage.replace("%minutes%", String.valueOf(minutes));
             if (minutes == 1) {
                 forcedRestartMessage = forcedRestartMessage.replace("minutes", "minute");
             }
-            forcedRestartMessage = forcedRestartMessage.replace("%minutes%", String.valueOf(minutes));
             sender.sendMessage(ChatColor.RED + "" + ChatColor.BOLD + forcedRestartMessage);
             return true;
         }
         return false;
+    }
+
+    @Override
+    public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
+        if (command.getName().equalsIgnoreCase("gijinkakunrestart")) {
+            if (args.length == 1) {
+                return validTimes.stream().filter(time -> time.startsWith(args[0])).collect(Collectors.toList());
+            }
+        }
+        return null;
     }
 
     /**
@@ -142,7 +156,7 @@ public class GijinkakunRestart extends JavaPlugin {
             }.runTaskLater(this, delay);
         }
     }
-    
+
     /**
      * Plays the anvil sound to all online players.
      */
