@@ -9,6 +9,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 
+import java.time.Duration;
 import java.time.LocalTime;
 import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoUnit;
@@ -48,14 +49,41 @@ public class GijinkakunRestart extends JavaPlugin {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (command.getName().equalsIgnoreCase("gijinkakunrestart")) {
+            if (args.length == 0) {
+                sender.sendMessage(ChatColor.RED + "Invalid argument! Use /gijinkakunrestart [30|15|10|5|1|time]");
+                return false;
+            }
+
+            if (args[0].equalsIgnoreCase("time")) {
+                if (!sender.hasPermission("gijinkakunrestart.time")) {
+                    sender.sendMessage(ChatColor.RED + "You do not have permission to use this command.");
+                    return true;
+                }
+                LocalTime now = LocalTime.now();
+                Duration duration = Duration.between(now, restartTime);
+                if (duration.isNegative()) {
+                    duration = duration.plusDays(1);
+                }
+
+                long hours = duration.toHours();
+                long minutes = duration.toMinutesPart();
+                long seconds = duration.toSecondsPart();
+
+                String timeMessage = ChatColor.YELLOW + "Server Restart in " + hours + " hours, " + minutes + " minutes, " + seconds + " seconds.";
+                sender.sendMessage(timeMessage);
+                return true;
+            }
+
             if (!sender.hasPermission("gijinkakunrestart.use")) {
                 sender.sendMessage(ChatColor.RED + "You do not have permission to use this command.");
                 return true;
             }
-            if (args.length != 1 || !validTimes.contains(args[0])) {
-                sender.sendMessage(ChatColor.RED + "Invalid argument! Use /gijinkakunrestart [30|15|10|5|1]");
+
+            if (!validTimes.contains(args[0])) {
+                sender.sendMessage(ChatColor.RED + "Invalid argument! Use /gijinkakunrestart [30|15|10|5|1|time]");
                 return false;
             }
+
             int minutes = Integer.parseInt(args[0]);
             scheduleForcedRestart(minutes);
             String forcedRestartMessage = getConfig().getString("messages.forced_restart", "Forced restart scheduled in %minutes% minutes.");
@@ -73,7 +101,11 @@ public class GijinkakunRestart extends JavaPlugin {
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
         if (command.getName().equalsIgnoreCase("gijinkakunrestart")) {
             if (args.length == 1) {
-                return validTimes.stream().filter(time -> time.startsWith(args[0])).collect(Collectors.toList());
+                if (sender.hasPermission("gijinkakunrestart.use")) {
+                    return validTimes.stream().filter(time -> time.startsWith(args[0])).collect(Collectors.toList());
+                } else if (sender.hasPermission("gijinkakunrestart.time")) {
+                    return Arrays.asList("time").stream().filter(time -> time.startsWith(args[0])).collect(Collectors.toList());
+                }
             }
         }
         return null;
